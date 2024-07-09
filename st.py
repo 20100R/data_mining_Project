@@ -26,3 +26,12 @@ method = st.selectbox("Choose the method to replace the missing values",['mean',
 if st.button("Replace missing values"):
     data = pre_processing.replace_missing_values(data,method)
     st.write(data)
+#add a selection box to choose the normalization method
+normalization_method = st.selectbox("Choose the normalization method",['Min-Max','Z-standardization'])
+#add a button to normalize the data
+if st.button("Normalize the data"):
+    if normalization_method == 'Min-Max':
+        data = pre_processing.normalize_min_max(data)
+    elif normalization_method == 'Z-standardization':
+        data = pre_processing.normalize_z_standardization(data)
+    st.write(data)
