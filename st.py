@@ -2,6 +2,8 @@
 import streamlit as st
 import pandas as pd
 from typing import Literal
+import numpy as np
+import visualization 
 import init_data, pre_processing
 #display the title
 st.title("Data Mining Project")
@@ -35,3 +37,12 @@ if st.button("Normalize the data"):
     elif normalization_method == 'Z-standardization':
         data = pre_processing.normalize_z_standardization(data)
     st.write(data)
+
+#add a button to display the histograms
+if st.button("Display histograms"):
+    st.write(data)
+    visualization.histograms(data)
+#add a button to display the box plots
+if st.button("Display box plots"):
+    st.write(data)
+    visualization.box_plots(data)
