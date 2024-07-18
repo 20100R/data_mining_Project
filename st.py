@@ -6,24 +6,51 @@ import numpy as np
 import visualization 
 import init_data, pre_processing
 import ml 
-#display the title
+
+# Function to detect separator
+def detect_separator(sample: str):
+    separators = [';', ',', '\t']  
+    counts = {sep: sample.count(sep) for sep in separators}
+    return max(counts, key=counts.get) 
+
 st.title("Data Mining Project")
 
-#do a selection box to choose the sepertor and the header
-sep = st.selectbox("Choose the separator",[';',',','tab'])
-header = st.selectbox("Choose the header",[0,1])
-
-#add a button to load the data
-
+# Upload the CSV file
 uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
-data=init_data.load_csv(uploaded_file,header=header,sep=sep)
-init_data.display_description(data)
-init_data.statistical_summary(data)
+
+# Variables to hold separator and header choice
+sep = None
+header = None
+
+if uploaded_file is not None:
+    # Read the first line to detect the separator
+    sample = uploaded_file.getvalue().decode('utf-8').split('\n')[0]
+    detected_sep = detect_separator(sample)
+    
+    # Let user choose or confirm the detected separator
+    sep = st.selectbox("Choose the separator", options=[f'Auto-detect: {detected_sep}',';', ',', 'tab'])
+    
+    # If auto-detect is selected, use the detected separator, convert 'tab' to '\t'
+    if sep.startswith('Auto-detect'):
+        sep = detected_sep if detected_sep != 'tab' else '\t'
+    
+    # Let user select the header row
+    header = st.selectbox("Choose the header", [0, 1, 'None'])
+    header = None if header == 'None' else header
+    
+    # Load the data using the selected separator and header
+    data = pd.read_csv(uploaded_file, header=header, sep=sep)
+        
+    # Display data description and statistics using functions from `init_data` module
+    init_data.display_description(data)
+    init_data.statistical_summary(data)
+
 
 #add a button to delete the empty rows and columns
 if st.button("Delete empty rows and columns"):
     data = pre_processing.delete_empty_row_col(data)
     st.write(data)
+
 #add a button to replace the missing values
 method = st.selectbox("Choose the method to replace the missing values",['mean','median','mode'])
 if st.button("Replace missing values"):
