@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from typing import Literal
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np

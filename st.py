@@ -1,10 +1,6 @@
 import streamlit as st
 import pandas as pd
-from typing import Literal
-import numpy as np
-import visualization 
-import init_data, pre_processing
-import ml 
+import init_data, pre_processing, visualization, ml
 
 st.title("Data Mining Project")
 
