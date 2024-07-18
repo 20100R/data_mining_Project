@@ -108,13 +108,12 @@ if 'data' in st.session_state:
 
     if option == 'Visualization':
         st.header("Visualization")
-        #add a button to display the histograms
         if st.button("Display histograms"):
             visualization.histograms(st.session_state['data'])
-        #add a button to display the box plots
         if st.button("Display box plots"):
             visualization.box_plots(st.session_state['data'])
-        # ADD +1 VISUALISATION (au moins)
+        if st.button("Display heatmap"):
+            visualization.correlation_heatmap(st.session_state['data'])
 
 
     if option == 'Clustering or Prediction':
