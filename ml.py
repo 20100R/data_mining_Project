@@ -1,15 +1,13 @@
 from sklearn.cluster import KMeans, DBSCAN, SpectralClustering
 import pandas as pd
-from typing import Literal
 from sklearn.linear_model import LinearRegression
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 import streamlit as st
 import numpy as np
-from sklearn.metrics import accuracy_score, mean_squared_error,r2_score
+from sklearn.metrics import mean_squared_error,r2_score
 
 def cluster_spectral(data, n_clusters=3):
     spectral = SpectralClustering(n_clusters=n_clusters, affinity='nearest_neighbors')
@@ -27,18 +25,7 @@ def cluster_dbscan(data, eps=0.5, min_samples=5):
     return labels
 
 def perform_clustering(data, algorithm, **kwargs):
-    """
-    Perform clustering on the provided DataFrame using the specified algorithm.
 
-    Parameters:
-    df (pd.DataFrame): The DataFrame to cluster.
-    algorithm (str): The clustering algorithm to use ('kmeans' or 'dbscan').
-    **kwargs: Additional keyword arguments to pass to the clustering algorithm.
-
-    Returns:
-    pd.DataFrame: DataFrame with an additional 'Cluster' column containing the cluster labels and the test score.
-    dict: A dictionary containing the test score.
-    """
     if algorithm == 'kmeans':
         return cluster_kmeans(data, **kwargs)
     elif algorithm == 'dbscan':
@@ -46,7 +33,7 @@ def perform_clustering(data, algorithm, **kwargs):
     elif algorithm == 'spectral':
         return cluster_spectral(data, **kwargs)
     else:
-        raise ValueError("Invalid algorithm. Please choose 'kmeans' or 'dbscan'.")
+        raise ValueError("Unsupported clustering algorithm")
 
 def perform_prediction(df: pd.DataFrame, target_column: str):
 
