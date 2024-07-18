@@ -6,13 +6,8 @@ import numpy as np
 import visualization 
 import init_data, pre_processing
 import ml 
-import io
 
-# Function to detect separator
-def detect_separator(sample: str):
-    separators = [';', ',', '\t']  
-    counts = {sep: sample.count(sep) for sep in separators}
-    return max(counts, key=counts.get) 
+
 
 st.title("Data Mining Project")
 
@@ -24,10 +19,12 @@ uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 sep = None
 header = None
 
+
+# Lorsque que la file présente
 if uploaded_file is not None:
     # Read the first line to detect the separator
     sample = uploaded_file.getvalue().decode('utf-8').split('\n')[0]
-    detected_sep = detect_separator(sample)
+    detected_sep = init_data.detect_separator(sample)
     
     # Let user choose or confirm the detected separator
     sep = st.selectbox("Choose the separator", options=[f'Auto-detect: {detected_sep}',';', ',', 'tab'])
@@ -43,37 +40,39 @@ if uploaded_file is not None:
     # Load the data using the selected separator and header
     data = pd.read_csv(uploaded_file, header=header, sep=sep)
     # Display Data
-    st.write("Data first 5 value:")
-    st.write(data.head())
-    st.write("Data last 5 value:")
-    st.write(data.tail())
-    st.write("Describe:")
-    st.write(data.describe())
-    st.write("Info:")
-    buffer = io.StringIO()
-    data.info(buf=buffer)
-    s = buffer.getvalue()
-    st.markdown('```plaintext\n' + s + '\n```')
-    st.write("Missing Data:")
-    st.write(data.isnull().sum())
+    init_data.display_description(data)
+
     if 'data' not in st.session_state:
         st.session_state['data'] = data
-
         st.write("Data loaded successfully")
     else:
         st.write("Data loaded successfully")
+
+
+# Lorsque que la file est charger
 if 'data' in st.session_state:
     st.header("Data Pre-processing and Cleaning")
-    #add a button to delete the empty rows and columns
-    if st.button("Delete empty rows and columns"):
-        st.session_state['data'] = pre_processing.delete_empty_row_col(st.session_state['data'])
+
+    st.subheader("Managing missing values:")
+    # User options for handling missing data
+    options = ["Delete empty rows and columns", "Replace missing values (mean)", "Replace missing values (median)", "Replace missing values (mode)"]
+    choice = st.selectbox("Select how to handle missing data:", options)
+
+    #Marche pas !!!!!! 
+    if st.button("Apply"):
+        if choice == "Delete empty rows and columns":
+            st.session_state['data'] = pre_processing.delete_empty_row_col(st.session_state['data'])
+        elif choice == "Replace missing values (mean)":
+            st.session_state['data'] = pre_processing.replace_missing_values(st.session_state['data'], 'mean')
+        elif choice == "Replace missing values (median)":
+            st.session_state['data'] = pre_processing.replace_missing_values(st.session_state['data'], 'median')
+        elif choice == "Replace missing values (mode)":
+            st.session_state['data'] = pre_processing.replace_missing_values(st.session_state['data'], 'mode')
+        
+        st.write("Updated Data:")
         st.write(st.session_state['data'])
 
-    #add a button to replace the missing values
-    method = st.selectbox("Choose the method to replace the missing values",['mean','median','mode'])
-    if st.button("Replace missing values"):
-        st.session_state['data'] = pre_processing.replace_missing_values(st.session_state['data'],method)
-        st.write(st.session_state['data'])
+    st.subheader("Data normalization:")
     #add a selection box to choose the normalization method
     normalization_method = st.selectbox("Choose the normalization method",['Min-Max','Z-standardization'])
     #add a button to normalize the data

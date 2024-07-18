@@ -1,18 +1,27 @@
 import pandas as pd
 import numpy as np
 import streamlit as st
-def load_csv(file_path,header=0,sep=','):
+import io
 
-    return pd.read_csv(file_path,header=header,sep=sep)
+# Function to detect separator
+def detect_separator(sample: str):
+    separators = [';', ',', '\t']  
+    counts = {sep: sample.count(sep) for sep in separators}
+    return max(counts, key=counts.get) 
+
+# Function to display lot of information about the dataset
 def display_description(data:pd.DataFrame):
-    #display the first and the last row of the data
+    st.write("Data first 5 value:")
     st.write(data.head())
+    st.write("Data last 5 value:")
     st.write(data.tail())
-def statistical_summary(data:pd.DataFrame): 
-    """: Provide a basic statistical summary of the data, including the
-    number of lines and columns, the name of the columns, the number of missing values per
-    column, etc."""
+    st.write("Describe:")
     st.write(data.describe())
-    st.write(data.info())
+    st.write("Info:")
+    buffer = io.StringIO()
+    data.info(buf=buffer)
+    s = buffer.getvalue()
+    st.markdown('```plaintext\n' + s + '\n```')
+    st.write("Missing Data:")
     st.write(data.isnull().sum())
 
