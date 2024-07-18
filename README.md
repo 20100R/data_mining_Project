@@ -15,13 +15,20 @@ Pour exécuter l'application en local, suivez ces étapes :
 
 ## Fonctionnalités
 Exploration initiale des données : Téléchargez et visualisez les premières et dernières lignes de votre dataset, obtenez des statistiques descriptives, et identifiez les valeurs manquantes.
+
 Prétraitement des données : Gérez les valeurs manquantes, normalisez les données, et préparez-les pour l'analyse.
+
 Visualisation : Générez des histogrammes, des boîtes à moustaches et des heatmaps pour mieux comprendre les distributions et les relations dans vos données.
+
 Clustering et prédiction : Appliquez des algorithmes de clustering comme KMeans et DBSCAN, et réalisez des prédictions avec des modèles de régression linéaire et d'arbres de décision.
 
 ## Technologies Utilisées
 Python
+
 Streamlit
+
 Pandas pour la manipulation des données
+
 Matplotlib et Seaborn pour la visualisation des données
+
 Scikit-learn pour le machine learning
