@@ -62,24 +62,19 @@ def correlation_heatmap(data: pd.DataFrame):
     st.pyplot(fig)
 
 
-def plot_clusters(data:pd.DataFrame,target_column:str,target_column2:str):
-    """
-    Display a scatter plot of the clustered data.
+def plot_clusters(data, labels, feature_names, centers=None):
+    
+    if isinstance(data, pd.DataFrame):
+        data = data.to_numpy()  # Convert DataFrame to NumPy array if necessary
 
-    Parameters:
-    data (pd.DataFrame): The DataFrame containing the cluster labels.
-    """
-    
     fig, ax = plt.subplots()
-    scatter = ax.scatter(data[target_column], data[target_column2], c=data["Cluster"], cmap='viridis')
+    scatter = ax.scatter(data[:, 0], data[:, 1], c=labels, cmap='viridis')
+    ax.set_title('Cluster Results')
+    ax.set_xlabel(feature_names[0])
+    ax.set_ylabel(feature_names[1])    
+    if centers is not None:
+        ax.scatter(centers[:, 0], centers[:, 1], s=200, c='red', marker='X')  # mark cluster centers
     
-    # Add a color bar
-    legend1 = ax.legend(*scatter.legend_elements(), title="Clusters")
-    ax.add_artist(legend1)
-    
-    ax.set_xlabel(target_column)
-    ax.set_ylabel(target_column2)
-    ax.set_title("Clustered Data")
     st.pyplot(fig)
 
 def plot_prediction(resultats:pd.DataFrame):

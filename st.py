@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import init_data, pre_processing, visualization, ml
 from sklearn.model_selection import train_test_split
 st.title("Data Mining Project")
@@ -116,30 +117,49 @@ if 'data' in st.session_state:
     if option == 'Clustering or Prediction':
         st.header("Clustering or Prediction (Visualization and Evaluation)")
         st.subheader("Clustering:")
-        #Selection box to choose the clustering algorithm
-        algorithm = st.selectbox("Choose the clustering algorithm",['kmeans','dbscan'])
-        if algorithm == 'dbscan':
-            eps = st.number_input("Enter the maximum distance between two samples",min_value=1.0)
-            min_samples = st.number_input("Enter the number of samples in a neighborhood for a point to be considered as a core point",min_value=1)
+
+        # Filter to only numeric columns
+        data = st.session_state['data']
+        numeric_columns = data.select_dtypes(include=[np.number]).columns
+
+        # Dropdown to select features
+        feature_1 = st.selectbox("Select Feature 1", numeric_columns, index=0)
+        feature_2 = st.selectbox("Select Feature 2", numeric_columns, index=1)
+        selected_data = data[[feature_1, feature_2]]
         
-        elif algorithm == 'kmeans':
-            #Selection for the number of clusters
-            cluster_number =st.selectbox("Choose the number of clusters",[1,2,3,4,5])
+        # Selection box to choose the clustering algorithm
+        algorithm = st.selectbox("Choose the clustering algorithm", ['kmeans', 'dbscan', 'spectral'])
+        
+        # Parameters for K-Means
+        if algorithm == 'kmeans':
+            n_clusters = st.slider("Number of clusters", min_value=2, max_value=10, value=3)
+        # Parameters for DBSCAN
+        elif algorithm == 'dbscan':
+            eps = st.slider("EPS (epsilon)", min_value=0.1, max_value=1.0, value=0.5, step=0.1)
+            min_samples = st.slider("Minimum samples", min_value=1, max_value=10, value=5)
+        elif algorithm == 'spectral':
+            n_clusters = st.slider("Number of clusters for Spectral Clustering", min_value=2, max_value=10, value=3)
 
-        target_column = st.selectbox("Choose the x",st.session_state['data'].columns)
-        target_column2 = st.selectbox("Choose the y",st.session_state['data'].columns)
-
+        
         if st.button("Perform clustering"):
+            
+            # Perform clustering
             if algorithm == 'kmeans':
-                st.session_state['data'], test_score = ml.perform_clustering(st.session_state['data'],algorithm,n_clusters=cluster_number)
-                #fait une figure pour afficher les clusters ????
-                visualization.plot_clusters(st.session_state['data'],target_column,target_column2)
-                st.write(f"Test score: {test_score}")
+                labels, centers = ml.perform_clustering(selected_data, algorithm, n_clusters=n_clusters)
+                visualization.plot_clusters(selected_data, labels, [feature_1, feature_2], centers=centers)
+                stats_df = ml.compute_cluster_stats(selected_data, labels, centers)
             elif algorithm == 'dbscan':
-                st.session_state['data'], test_score = ml.perform_clustering(st.session_state['data'],algorithm,eps=eps,min_samples=min_samples)
-                visualization.plot_clusters(st.session_state['data'], target_column, target_column2)
-        #Pas ultra convaincu a revoir + de stats
-
+                labels = ml.perform_clustering(selected_data, algorithm, eps=eps, min_samples=min_samples)
+                visualization.plot_clusters(selected_data, labels, [feature_1, feature_2])
+                stats_df = ml.compute_cluster_stats(selected_data, labels)
+            elif algorithm == 'spectral':
+                labels = ml.perform_clustering(selected_data, algorithm, n_clusters=n_clusters)
+                visualization.plot_clusters(selected_data, labels, [feature_1, feature_2])
+                stats_df = ml.compute_cluster_stats(selected_data, labels)
+            
+            st.write("Cluster Statistics:")
+            st.dataframe(stats_df)
+            
 
         st.subheader("Prediction:")
         #Selection box to choose the prediction algorithm
