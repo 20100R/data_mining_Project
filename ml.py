@@ -1,41 +1,67 @@
-from sklearn.cluster import KMeans, DBSCAN
+from sklearn.cluster import KMeans, DBSCAN, SpectralClustering
 import pandas as pd
 from typing import Literal
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, mean_squared_error
-import pandas as pd
-def perform_clustering(df: pd.DataFrame, algorithm: Literal['kmeans', 'dbscan'], **kwargs):
-    """
-    Perform clustering on the provided DataFrame using the specified algorithm.
+import numpy as np
 
-    Parameters:
-    df (pd.DataFrame): The DataFrame to cluster.
-    algorithm (str): The clustering algorithm to use ('kmeans' or 'dbscan').
-    **kwargs: Additional keyword arguments to pass to the clustering algorithm.
+def cluster_spectral(data, n_clusters=3):
+    spectral = SpectralClustering(n_clusters=n_clusters, affinity='nearest_neighbors')
+    labels = spectral.fit_predict(data)
+    return labels
 
-    Returns:
-    pd.DataFrame: DataFrame with an additional 'Cluster' column containing the cluster labels and the test score.
-    dict: A dictionary containing the test score.
-    """
+def cluster_kmeans(data, n_clusters=3):
+    kmeans = KMeans(n_clusters=n_clusters)
+    labels = kmeans.fit_predict(data)
+    return labels, kmeans.cluster_centers_
+
+def cluster_dbscan(data, eps=0.5, min_samples=5):
+    dbscan = DBSCAN(eps=eps, min_samples=min_samples)
+    labels = dbscan.fit_predict(data)
+    return labels
+
+def perform_clustering(data, algorithm, **kwargs):
     if algorithm == 'kmeans':
-        model = KMeans(**kwargs)
-        X = df.values
-        labels = model.fit_predict(X)
-        df['Cluster'] = labels
-        test_score = model.score(X)
-        return df, test_score
+        return cluster_kmeans(data, **kwargs)
     elif algorithm == 'dbscan':
-        eps = kwargs.get('eps', 0.5)
-        min_samples = kwargs.get('min_samples', 5)
-        model = DBSCAN(eps=eps, min_samples=min_samples)
-        X = df.values
-        labels = model.fit_predict(X)
-        df['Cluster'] = labels
-        return df, None
+        return cluster_dbscan(data, **kwargs)
+    elif algorithm == 'spectral':
+        return cluster_spectral(data, **kwargs)
     else:
-        raise ValueError("Invalid algorithm. Please choose 'kmeans' or 'dbscan'.")
+        raise ValueError("Unsupported clustering algorithm")
+    
+def compute_cluster_stats(data, labels, centers=None):
+    """
+    Compute and return statistics for clusters.
+    """
+    if isinstance(data, pd.DataFrame):
+        data = data.to_numpy()
+    
+    # Determine the number of clusters
+    unique_labels = np.unique(labels[labels >= 0])  # Excluding noise if present
+    stats = []
+
+    for label in unique_labels:
+        cluster_data = data[labels == label]
+        cluster_size = cluster_data.shape[0]
+        if centers is not None:
+            center = centers[label]
+            # Calculate mean distance to the center
+            distances = np.sqrt(np.sum((cluster_data - center)**2, axis=1))
+            mean_distance = np.mean(distances)
+            stats.append({'Cluster': label, 'Size': cluster_size, 'Center': center, 'Mean Distance': mean_distance})
+        else:
+            stats.append({'Cluster': label, 'Size': cluster_size})
+    
+    # Handle noise specially for DBSCAN
+    if -1 in labels:
+        noise_size = (labels == -1).sum()
+        stats.append({'Cluster': 'Noise', 'Size': noise_size})
+
+    return pd.DataFrame(stats)
+
 
 def perform_prediction(df: pd.DataFrame, target_column: str, algorithm: Literal['linear_regression', 'decision_tree'], **kwargs):
     """
