@@ -6,6 +6,7 @@ import numpy as np
 import visualization 
 import init_data, pre_processing
 import ml 
+import io
 
 # Function to detect separator
 def detect_separator(sample: str):
@@ -15,6 +16,7 @@ def detect_separator(sample: str):
 
 st.title("Data Mining Project")
 
+st.header("Initial Data Exploration")
 # Upload the CSV file
 uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
@@ -41,11 +43,23 @@ if uploaded_file is not None:
     # Load the data using the selected separator and header
     data = pd.read_csv(uploaded_file, header=header, sep=sep)
         
-    # Display data description and statistics using functions from `init_data` module
-    init_data.display_description(data)
-    init_data.statistical_summary(data)
+    # Display Data
+    st.write("Data first 5 value:")
+    st.write(data.head())
+    st.write("Data last 5 value:")
+    st.write(data.tail())
+    st.write("Describe:")
+    st.write(data.describe())
+    st.write("Info:")
+    buffer = io.StringIO()
+    data.info(buf=buffer)
+    s = buffer.getvalue()
+    st.markdown('```plaintext\n' + s + '\n```')
+    st.write("Missing Data:")
+    st.write(data.isnull().sum())
 
 
+st.header("Data Pre-processing and Cleaning")
 #add a button to delete the empty rows and columns
 if st.button("Delete empty rows and columns"):
     data = pre_processing.delete_empty_row_col(data)
