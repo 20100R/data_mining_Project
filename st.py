@@ -1,4 +1,3 @@
-#Streamlit
 import streamlit as st
 import pandas as pd
 from typing import Literal
@@ -91,7 +90,7 @@ if 'data' in st.session_state:
 
 
 
-    st.header("Visualisation of the cleaned data")
+    st.header("Visualisation")
     #add a button to display the histograms
     if st.button("Display histograms"):
         visualization.histograms(st.session_state['data'])
@@ -102,16 +101,18 @@ if 'data' in st.session_state:
 
 
     
-    st.header("Clustering or prediction")
+    st.header("Clustering or Prediction (Visualisation and Evaluation)")
+    st.subheader("Clustering:")
     #add a selection box to choose the clustering algorithm
     algorithm = st.selectbox("Choose the clustering algorithm",['kmeans','dbscan'])
     if algorithm == 'dbscan':
         eps = st.number_input("Enter the maximum distance between two samples",min_value=1.0)
         min_samples = st.number_input("Enter the number of samples in a neighborhood for a point to be considered as a core point",min_value=1)
+    
     elif algorithm == 'kmeans':
-
         #add a selection box to choose the number of clusters
         cluster_number =st.selectbox("Choose the number of clusters",[1,2,3,4,5])
+
     target_column = st.selectbox("Choose the x",st.session_state['data'].columns)
     target_column2 = st.selectbox("Choose the y",st.session_state['data'].columns)
     #add a button to perform clustering
@@ -124,8 +125,10 @@ if 'data' in st.session_state:
         elif algorithm == 'dbscan':
             st.session_state['data'], test_score = ml.perform_clustering(st.session_state['data'],algorithm,eps=eps,min_samples=min_samples)
             visualization.plot_clusters(st.session_state['data'], target_column, target_column2)
-        st.write(st.session_state['data'])
+    #Pas ultra convaincu a revoir + de stats
 
+
+    st.subheader("Prediction:")
     #add a selection box to choose the prediction algorithm
     algorithm = st.selectbox("Choose the prediction algorithm",['linear_regression','decision_tree'])
     #add a button to perform prediction
@@ -137,3 +140,5 @@ if 'data' in st.session_state:
             model, scores = ml.perform_prediction(st.session_state['data'],target_column,algorithm)
         st.write(st.session_state['data'])
         st.write(scores)
+    
+    #Jsp ajouter graph + stats + test
