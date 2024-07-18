@@ -2,29 +2,22 @@ import streamlit as st
 import pandas as pd
 from typing import Literal
 import matplotlib.pyplot as plt
-def histograms(data:pd.DataFrame):
-    """
-    Display histograms for each column in a DataFrame.
 
-    Parameters:
-    data (pd.DataFrame): The DataFrame to display histograms for.
-    """
+def histograms(data: pd.DataFrame):
     for col in data.columns:
-        st.write(f"## {col}")
-        st.write(data[col].hist())
-        st.pyplot()
+        st.subheader(f"Histogram for {col}")
+        fig, ax = plt.subplots()
+        data[col].hist(ax=ax)
+        ax.set_xlabel(f'{col}') 
+        ax.set_ylabel('Frequency')
+        st.pyplot(fig)
 
-def box_plots(data:pd.DataFrame):
-    """
-    Display box plots for each column in a DataFrame.
-
-    Parameters:
-    data (pd.DataFrame): The DataFrame to display box plots for.
-    """
+def box_plots(data: pd.DataFrame):
     for col in data.columns:
-        st.write(f"## {col}")
-        st.write(data[col].plot(kind='box'))
-        st.pyplot()
+        st.subheader(f"Box Plot for {col}")
+        fig, ax = plt.subplots()
+        data[col].plot(kind='box', ax=ax)
+        st.pyplot(fig)
         
 def plot_clusters(data:pd.DataFrame,target_column:str,target_column2:str):
     """

@@ -19,6 +19,9 @@ uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 sep = None
 header = None
 
+st.set_option('deprecation.showPyplotGlobalUse', False)
+
+
 
 # Lorsque que la file présente
 if uploaded_file is not None:
@@ -72,6 +75,8 @@ if 'data' in st.session_state:
         st.write("Updated Data:")
         st.write(st.session_state['data'])
 
+
+
     st.subheader("Data normalization:")
     #add a selection box to choose the normalization method
     normalization_method = st.selectbox("Choose the normalization method",['Min-Max','Z-standardization'])
@@ -82,16 +87,22 @@ if 'data' in st.session_state:
         elif normalization_method == 'Z-standardization':
             st.session_state['data'] = pre_processing.normalize_z_standardization(st.session_state['data'])
         st.write(st.session_state['data'])
+    # ADD +1 OPTIONS
 
+
+
+    st.header("Visualisation of the cleaned data")
     #add a button to display the histograms
     if st.button("Display histograms"):
-        st.write(st.session_state['data'])
         visualization.histograms(st.session_state['data'])
     #add a button to display the box plots
     if st.button("Display box plots"):
-        st.write(st.session_state['data'])
         visualization.box_plots(st.session_state['data'])
+    # ADD +1 VISUALISATION (au moins)
 
+
+    
+    st.header("Clustering or prediction")
     #add a selection box to choose the clustering algorithm
     algorithm = st.selectbox("Choose the clustering algorithm",['kmeans','dbscan'])
     if algorithm == 'dbscan':
