@@ -3,41 +3,36 @@ from typing import Literal
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import scale
 
-def delete_empty_row_col(df:pd.DataFrame):
-    """
-    Remove completely empty rows and columns from a DataFrame.
+from sklearn.impute import KNNImputer
 
-    Parameters:
-    df (pd.DataFrame): The DataFrame to process.
-
-    Returns:
-    pd.DataFrame: The DataFrame without completely empty rows and columns.
-    """
-    # Supprimer les colonnes entièrement vides
-    df = df.dropna(axis=1, how='all')
-    # Supprimer les lignes entièrement vides
-    df = df.dropna(axis=0, how='all')
+def delete_missing_row_col(df: pd.DataFrame) -> pd.DataFrame:
+    # Supprimer les colonnes contenant au moins une valeur NaN
+    df = df.dropna(axis=1, how='any')
+    # Supprimer les lignes contenant au moins une valeur NaN
+    df = df.dropna(axis=0, how='any')
     return df
 
-def replace_missing_values(df, method=Literal['mean', 'median', 'mode']):
-    """
-    Replace missing values in a DataFrame with a specified value.
+def replace_missing_values(df: pd.DataFrame, method: Literal['mean', 'median', 'mode', 'knn']) -> pd.DataFrame:
+    # Identify numeric columns
+    numeric_cols = df.select_dtypes(include=['number']).columns
 
-    Parameters:
-    df (pd.DataFrame): The DataFrame to process.
-    method (str): The method to use to replace missing values. Options are 'mean', 'median', 'mode'.
-
-    Returns:
-    pd.DataFrame: The DataFrame with missing values replaced.
-    """
     if method == 'mean':
-        return df.fillna(df.mean())
+        df[numeric_cols] = df[numeric_cols].fillna(df[numeric_cols].mean())
     elif method == 'median':
-        return df.fillna(df.median())
-    elif method == 'mode': #TODO # je suis pas sur de ca à vérifier
-        return df.fillna(df.mode())
+        df[numeric_cols] = df[numeric_cols].fillna(df[numeric_cols].median())
+    elif method == 'mode':
+        # Calculate mode for each numeric column and use the first mode if there are multiple modes
+        for col in numeric_cols:
+            mode_value = df[col].mode().iloc[0]  # This takes the first mode if there are multiple
+            df[col] = df[col].fillna(mode_value)
+    elif method == 'knn':
+        # Use KNN imputer (default 5)
+        imputer = KNNImputer(n_neighbors=5)
+        df[numeric_cols] = imputer.fit_transform(df[numeric_cols])
     else:
-        raise ValueError("Invalid method. Please choose 'mean', 'median', or 'mode'.")
+        raise ValueError("Invalid method. Please choose 'mean', 'median', 'mode', or 'knn'.")
+
+    return df
     
 def normalize_min_max(df:pd.DataFrame):
     """

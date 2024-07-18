@@ -71,19 +71,21 @@ if 'data' in st.session_state:
 
         st.subheader("Managing missing values:")
         # User options for handling missing data
-        options = ["Delete empty rows and columns", "Replace missing values (mean)", "Replace missing values (median)", "Replace missing values (mode)"]
+        options = ["Delete empty rows and columns", "Replace missing values (mean)", "Replace missing values (median)", "Replace missing values (mode)","Replace missing values (knn imputation)"]
         choice = st.selectbox("Select how to handle missing data:", options)
 
         #Marche pas !!!!!! 
         if st.button("Apply"):
             if choice == "Delete empty rows and columns":
-                st.session_state['data'] = pre_processing.delete_empty_row_col(st.session_state['data'])
+                st.session_state['data'] = pre_processing.delete_missing_row_col(st.session_state['data'])
             elif choice == "Replace missing values (mean)":
                 st.session_state['data'] = pre_processing.replace_missing_values(st.session_state['data'], 'mean')
             elif choice == "Replace missing values (median)":
                 st.session_state['data'] = pre_processing.replace_missing_values(st.session_state['data'], 'median')
             elif choice == "Replace missing values (mode)":
                 st.session_state['data'] = pre_processing.replace_missing_values(st.session_state['data'], 'mode')
+            elif choice == "Replace missing values (knn imputation)":
+                st.session_state['data'] = pre_processing.replace_missing_values(st.session_state['data'], 'knn')
             
             st.write("Updated Data:")
             st.write(st.session_state['data'])
