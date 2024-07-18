@@ -122,8 +122,8 @@ if 'data' in st.session_state:
     target_column = st.selectbox("Choose the target column",st.session_state['data'].columns)
     if st.button("Perform prediction"):
         if algorithm == 'linear_regression':
-            st.session_state['data'], scores = ml.perform_prediction(st.session_state['data'],target_column,algorithm)
+            model, scores = ml.perform_prediction(st.session_state['data'],target_column,algorithm)
         elif algorithm == 'decision_tree':
-            st.session_state['data'], scores = ml.perform_prediction(st.session_state['data'],target_column,algorithm)
+            model, scores = ml.perform_prediction(st.session_state['data'],target_column,algorithm)
         st.write(st.session_state['data'])
         st.write(scores)
