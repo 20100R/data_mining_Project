@@ -21,20 +21,21 @@ def perform_clustering(df: pd.DataFrame, algorithm: Literal['kmeans', 'dbscan'],
     """
     if algorithm == 'kmeans':
         model = KMeans(**kwargs)
+        X = df.values
+        labels = model.fit_predict(X)
+        df['Cluster'] = labels
+        test_score = model.score(X)
+        return df, test_score
     elif algorithm == 'dbscan':
-        model = DBSCAN(**kwargs)
+        eps = kwargs.get('eps', 0.5)
+        min_samples = kwargs.get('min_samples', 5)
+        model = DBSCAN(eps=eps, min_samples=min_samples)
+        X = df.values
+        labels = model.fit_predict(X)
+        df['Cluster'] = labels
+        return df, None
     else:
         raise ValueError("Invalid algorithm. Please choose 'kmeans' or 'dbscan'.")
-    
-    X = df.values
-    labels = model.fit_predict(X)
-    df['Cluster'] = labels
-    #test la qualité de la prédiction
-    if algorithm == 'kmeans':
-        test_score = model.score(X)
-    else:
-        test_score = None
-    return df, test_score
 
 def perform_prediction(df: pd.DataFrame, target_column: str, algorithm: Literal['linear_regression', 'decision_tree'], **kwargs):
     """

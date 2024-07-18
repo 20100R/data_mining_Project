@@ -110,10 +110,10 @@ if 'data' in st.session_state:
             st.session_state['data'], test_score = ml.perform_clustering(st.session_state['data'],algorithm,n_clusters=cluster_number)
             #fait une figure pour afficher les clusters
             visualization.plot_clusters(st.session_state['data'],target_column,target_column2)
-            st.session_state['data'] = st.session_state['data']
             st.write(f"Test score: {test_score}")
         elif algorithm == 'dbscan':
-            st.session_state['data'] = ml.perform_clustering(st.session_state['data'],algorithm,eps=eps,min_samples=min_samples)
+            st.session_state['data'], test_score = ml.perform_clustering(st.session_state['data'],algorithm,eps=eps,min_samples=min_samples)
+            visualization.plot_clusters(st.session_state['data'], target_column, target_column2)
         st.write(st.session_state['data'])
 
     #add a selection box to choose the prediction algorithm
