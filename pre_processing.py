@@ -1,18 +1,19 @@
 import pandas as pd
 from typing import Literal
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.preprocessing import scale
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import RobustScaler
 
 from sklearn.impute import KNNImputer
 
-def delete_missing_row_col(df: pd.DataFrame) -> pd.DataFrame:
+def delete_missing_row_col(df: pd.DataFrame):
     # Supprimer les colonnes contenant au moins une valeur NaN
     df = df.dropna(axis=1, how='any')
     # Supprimer les lignes contenant au moins une valeur NaN
     df = df.dropna(axis=0, how='any')
     return df
 
-def replace_missing_values(df: pd.DataFrame, method: Literal['mean', 'median', 'mode', 'knn']) -> pd.DataFrame:
+def replace_missing_values(df: pd.DataFrame, method: Literal['mean', 'median', 'mode', 'knn']):
     # Identify numeric columns
     numeric_cols = df.select_dtypes(include=['number']).columns
 
@@ -34,31 +35,41 @@ def replace_missing_values(df: pd.DataFrame, method: Literal['mean', 'median', '
 
     return df
     
-def normalize_min_max(df:pd.DataFrame):
-    """
-    Normalize a DataFrame using Min-Max normalization.
-
-    Parameters:
-    df (pd.DataFrame): The DataFrame to normalize.
-
-    Returns:
-    pd.DataFrame: The normalized DataFrame.
-    """
+def normalize_min_max(df: pd.DataFrame):
+    # Create a scaler object
     scaler = MinMaxScaler(feature_range=(0, 1))
-    return pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
+    
+    # Identify numeric columns 
+    numeric_cols = df.select_dtypes(include=['number']).columns
 
-def normalize_z_standardization(df:pd.DataFrame):
+    df_normalized = df.copy()
+    df_normalized[numeric_cols] = scaler.fit_transform(df[numeric_cols])
+    return pd.DataFrame(df_normalized, columns=df.columns)
+
+def normalize_z_standardization(df: pd.DataFrame):
+    # Create a scaler object for Z-score standardization
+    scaler = StandardScaler()
+    
+    # Identify numeric columns
+    numeric_cols = df.select_dtypes(include=['number']).columns
+    
+    df_normalized = df.copy()
+    df_normalized[numeric_cols] = scaler.fit_transform(df[numeric_cols])
+    return pd.DataFrame(df_normalized, columns=df.columns)
+
+def normalize_robust(df: pd.DataFrame):
     """
-    Normalize a DataFrame using Z-standardization. 
-    Which resizes the data to have a mean of 0 and a standard
-    deviation of 1.
+    Robust Scaling removes the median and scales the data according to the Interquartile Range (IQR).
+    This method is less sensitive to outliers than other scaling methods.
 
-    Parameters:
-    df (pd.DataFrame): The DataFrame to normalize.
-
-    Returns:
-    pd.DataFrame: The normalized DataFrame.
     """
-    df_normalized = scale (df)
+    # Create a robust scaler object
+    scaler = RobustScaler()
+    
+    # Identify numeric columns (select types that are considered numeric)
+    numeric_cols = df.select_dtypes(include=['number']).columns
+    
+    df_normalized = df.copy()
+    df_normalized[numeric_cols] = scaler.fit_transform(df[numeric_cols])
     return pd.DataFrame(df_normalized, columns=df.columns)
 

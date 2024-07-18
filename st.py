@@ -74,7 +74,6 @@ if 'data' in st.session_state:
         options = ["Delete empty rows and columns", "Replace missing values (mean)", "Replace missing values (median)", "Replace missing values (mode)","Replace missing values (knn imputation)"]
         choice = st.selectbox("Select how to handle missing data:", options)
 
-        #Marche pas !!!!!! 
         if st.button("Apply"):
             if choice == "Delete empty rows and columns":
                 st.session_state['data'] = pre_processing.delete_missing_row_col(st.session_state['data'])
@@ -94,15 +93,17 @@ if 'data' in st.session_state:
 
         st.subheader("Data normalization:")
         #add a selection box to choose the normalization method
-        normalization_method = st.selectbox("Choose the normalization method",['Min-Max','Z-standardization'])
+        normalization_method = st.selectbox("Choose the normalization method",['Min-Max','Z-standardization','Robust'])
         #add a button to normalize the data
         if st.button("Normalize the data"):
             if normalization_method == 'Min-Max':
                 st.session_state['data'] = pre_processing.normalize_min_max(st.session_state['data'])
             elif normalization_method == 'Z-standardization':
                 st.session_state['data'] = pre_processing.normalize_z_standardization(st.session_state['data'])
+            elif normalization_method == 'Robust':
+                st.session_state['data'] = pre_processing.normalize_robust(st.session_state['data'])
+            st.write("Normalize Data:")
             st.write(st.session_state['data'])
-        # ADD +1 OPTIONS
 
 
     if option == 'Visualization':

@@ -7,8 +7,14 @@ def histograms(data: pd.DataFrame):
     for col in data.columns:
         st.subheader(f"Histogram for {col}")
         fig, ax = plt.subplots()
-        data[col].hist(ax=ax)
-        ax.set_xlabel(f'{col}') 
+        if data[col].dtype == 'bool' or data[col].dtype == 'object':
+            # For categorical data or booleans, count the frequency of each 
+            data[col].value_counts().plot(kind='bar', ax=ax)
+        else:
+            # For numeric data, use a histogram
+            data[col].hist(ax=ax)
+
+        ax.set_xlabel(col)
         ax.set_ylabel('Frequency')
         st.pyplot(fig)
 
