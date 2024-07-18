@@ -91,17 +91,24 @@ if st.button("Display box plots"):
 
 #add a selection box to choose the clustering algorithm
 algorithm = st.selectbox("Choose the clustering algorithm",['kmeans','dbscan'])
-#add a selection box to choose the number of clusters
-cluster_number =st.selectbox("Choose the number of clusters",[1,2,3,4,5])
+if algorithm == 'dbscan':
+    eps = st.number_input("Enter the maximum distance between two samples",min_value=1.0)
+    min_samples = st.number_input("Enter the number of samples in a neighborhood for a point to be considered as a core point",min_value=1)
+elif algorithm == 'kmeans':
 
+    #add a selection box to choose the number of clusters
+    cluster_number =st.selectbox("Choose the number of clusters",[1,2,3,4,5])
+target_column = st.selectbox("Choose the x",data.columns)
+target_column2 = st.selectbox("Choose the y",data.columns)
 #add a button to perform clustering
 if st.button("Perform clustering"):
     if algorithm == 'kmeans':
-        data = ml.perform_clustering(data,algorithm,n_clusters=cluster_number)
+        data, test_score = ml.perform_clustering(data,algorithm,n_clusters=cluster_number)
+        #fait une figure pour afficher les clusters
+        visualization.plot_clusters(data,target_column,target_column2)
+        st.write(f"Test score: {test_score}")
     elif algorithm == 'dbscan':
-        eps = st.number_input("Enter the maximum distance between two samples",min_value=0.0)
-        min_samples = st.number_input("Enter the number of samples in a neighborhood for a point to be considered as a core point",min_value=1)
-        data = ml.perform_clustering(data,algorithm,eps=eps,min_samples=min_samples)
+         data = ml.perform_clustering(data,algorithm,eps=eps,min_samples=min_samples)
     st.write(data)
 
 #add a selection box to choose the prediction algorithm

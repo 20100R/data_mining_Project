@@ -30,7 +30,10 @@ def perform_clustering(df: pd.DataFrame, algorithm: Literal['kmeans', 'dbscan'],
     labels = model.fit_predict(X)
     df['Cluster'] = labels
     #test la qualité de la prédiction
-    test_score = model.score(X)
+    if algorithm == 'kmeans':
+        test_score = model.score(X)
+    else:
+        test_score = None
     return df, test_score
 
 def perform_prediction(df: pd.DataFrame, target_column: str, algorithm: Literal['linear_regression', 'decision_tree'], **kwargs):
