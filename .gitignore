@@ -1,2 +1,4 @@
 
 *.pyc
+#add __pycache__ to ignore
+__pycache__/
