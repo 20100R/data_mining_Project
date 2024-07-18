@@ -57,7 +57,7 @@ def correlation_heatmap(data: pd.DataFrame):
 
     # Plotting the heatmap
     st.subheader("Correlation Heatmap")
-    fig, ax = plt.subplots(figsize=(10, 8))  # Adjust size as needed
+    fig, ax = plt.subplots(figsize=(10, 8))  
     sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', ax=ax)
     ax.set_title('Correlation Matrix Heatmap')
     st.pyplot(fig)

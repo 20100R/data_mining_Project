@@ -14,7 +14,7 @@ option = st.sidebar.selectbox('Choose a section:',
     ('Initial Data Exploration', 'Data Pre-processing and Cleaning', 'Visualization', 'Clustering or Prediction'))
 
 
-# Informations personnelles
+# Personal Information
 for i in range(25):
     st.sidebar.markdown("")
 st.sidebar.markdown("---")
@@ -35,7 +35,7 @@ if option == 'Initial Data Exploration':
 
 
 
-    # Lorsque que la file présente
+    # When the file is present
     if uploaded_file is not None:
         # Read the first line to detect the separator
         sample = uploaded_file.getvalue().decode('utf-8').split('\n')[0]
@@ -64,13 +64,14 @@ if option == 'Initial Data Exploration':
         else:
             st.write("Data loaded successfully")
 
-# Lorsque que la file est charger
+# When the file is loaded
 if 'data' in st.session_state:
     if option == 'Data Pre-processing and Cleaning':
         st.header("Data Pre-processing and Cleaning")
 
         st.subheader("Managing missing values:")
-        # User options for handling missing data
+
+        # Options for handling missing data
         options = ["Delete empty rows and columns", "Replace missing values (mean)", "Replace missing values (median)", "Replace missing values (mode)","Replace missing values (knn imputation)"]
         choice = st.selectbox("Select how to handle missing data:", options)
 
@@ -92,9 +93,8 @@ if 'data' in st.session_state:
 
 
         st.subheader("Data normalization:")
-        #add a selection box to choose the normalization method
+        #Selection box to choose the normalization method
         normalization_method = st.selectbox("Choose the normalization method",['Min-Max','Z-standardization','Robust'])
-        #add a button to normalize the data
         if st.button("Normalize the data"):
             if normalization_method == 'Min-Max':
                 st.session_state['data'] = pre_processing.normalize_min_max(st.session_state['data'])
@@ -108,6 +108,7 @@ if 'data' in st.session_state:
 
     if option == 'Visualization':
         st.header("Visualization")
+        #Box for the visalization
         if st.button("Display histograms"):
             visualization.histograms(st.session_state['data'])
         if st.button("Display box plots"):
@@ -119,23 +120,23 @@ if 'data' in st.session_state:
     if option == 'Clustering or Prediction':
         st.header("Clustering or Prediction (Visualization and Evaluation)")
         st.subheader("Clustering:")
-        #add a selection box to choose the clustering algorithm
+        #Selection box to choose the clustering algorithm
         algorithm = st.selectbox("Choose the clustering algorithm",['kmeans','dbscan'])
         if algorithm == 'dbscan':
             eps = st.number_input("Enter the maximum distance between two samples",min_value=1.0)
             min_samples = st.number_input("Enter the number of samples in a neighborhood for a point to be considered as a core point",min_value=1)
         
         elif algorithm == 'kmeans':
-            #add a selection box to choose the number of clusters
+            #Selection for the number of clusters
             cluster_number =st.selectbox("Choose the number of clusters",[1,2,3,4,5])
 
         target_column = st.selectbox("Choose the x",st.session_state['data'].columns)
         target_column2 = st.selectbox("Choose the y",st.session_state['data'].columns)
-        #add a button to perform clustering
+
         if st.button("Perform clustering"):
             if algorithm == 'kmeans':
                 st.session_state['data'], test_score = ml.perform_clustering(st.session_state['data'],algorithm,n_clusters=cluster_number)
-                #fait une figure pour afficher les clusters
+                #fait une figure pour afficher les clusters ????
                 visualization.plot_clusters(st.session_state['data'],target_column,target_column2)
                 st.write(f"Test score: {test_score}")
             elif algorithm == 'dbscan':
@@ -145,9 +146,8 @@ if 'data' in st.session_state:
 
 
         st.subheader("Prediction:")
-        #add a selection box to choose the prediction algorithm
+        #Selection box to choose the prediction algorithm
         algorithm = st.selectbox("Choose the prediction algorithm",['linear_regression','decision_tree'])
-        #add a button to perform prediction
         target_column = st.selectbox("Choose the target column",st.session_state['data'].columns)
         if st.button("Perform prediction"):
             if algorithm == 'linear_regression':
