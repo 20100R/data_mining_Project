@@ -81,3 +81,29 @@ def plot_clusters(data:pd.DataFrame,target_column:str,target_column2:str):
     ax.set_ylabel(target_column2)
     ax.set_title("Clustered Data")
     st.pyplot(fig)
+
+def plot_prediction(resultats:pd.DataFrame):
+    fig, z = plt.subplots(figsize=(16, 12))
+    barre = 0.3
+    x = np.arange(len(resultats))
+
+    z.bar(x + barre, resultats['MSE'], width=barre, label='MSE')
+    z.bar(x - barre, resultats['R2'], width=barre, label='R2')
+
+    z.legend()
+
+    z.set_xticks(x)
+    z.set_xticklabels(resultats['Model'], rotation=45)
+    z.legend()
+
+    plt.title("comparaison d'efficacite des modeles")
+    st.pyplot(fig)
+
+def plot_predict(y_test, y_pred):
+                #afficher les predictions
+            fig = plt.figure()
+            plt.plot(y_test, y_pred, 'o')
+            plt.xlabel('True values')
+            plt.ylabel('Predicted values')
+            plt.title('True vs Predicted values')
+            st.pyplot(fig)

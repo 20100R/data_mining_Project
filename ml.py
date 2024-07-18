@@ -6,6 +6,12 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, mean_squared_error
 import pandas as pd
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score
+import streamlit as st
 def perform_clustering(df: pd.DataFrame, algorithm: Literal['kmeans', 'dbscan'], **kwargs):
     """
     Perform clustering on the provided DataFrame using the specified algorithm.
@@ -37,42 +43,48 @@ def perform_clustering(df: pd.DataFrame, algorithm: Literal['kmeans', 'dbscan'],
     else:
         raise ValueError("Invalid algorithm. Please choose 'kmeans' or 'dbscan'.")
 
-def perform_prediction(df: pd.DataFrame, target_column: str, algorithm: Literal['linear_regression', 'decision_tree'], **kwargs):
-    """
-    Perform prediction on the provided DataFrame using the specified algorithm.
+def perform_prediction(df: pd.DataFrame, target_column: str):
 
-    Parameters:
-    df (pd.DataFrame): The DataFrame containing the features and the target column.
-    target_column (str): The name of the target column in the DataFrame.
-    algorithm (str): The prediction algorithm to use ('linear_regression' or 'decision_tree').
-    **kwargs: Additional keyword arguments to pass to the prediction algorithm.
+    models = [
+    ('Regression Linear'),
+    ('Regression Ridge'),
+    ('Regression Lasso'),
+    ('K-Nearest Neighbors'),
+    ('Decision Tree'),
+    ]
 
-    Returns:
-    model: The trained model.
-    dict: A dictionary containing the training and test scores and the metric used.
-    """
-    y = df[target_column]
-    X = df.drop(columns=[target_column])
- 
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    if algorithm == 'linear_regression':
-        model = LinearRegression(**kwargs)
-        model.fit(X_train, y_train)
-        y_train_pred = model.predict(X_train)
-        y_test_pred = model.predict(X_test)
-        train_score = mean_squared_error(y_train, y_train_pred)
-        test_score = mean_squared_error(y_test, y_test_pred)
-        return model, {'train_score': train_score, 'test_score': test_score, 'metric': 'Mean Squared Error'}    
-    elif algorithm == 'decision_tree':
-        model = DecisionTreeClassifier(**kwargs)
-        model.fit(X_train, y_train)
-        y_train_pred = model.predict(X_train)
-        y_test_pred = model.predict(X_test)
-        train_score = accuracy_score(y_train, y_train_pred)
-        test_score = accuracy_score(y_test, y_test_pred)
-        return model, {'train_score': train_score, 'test_score': test_score, 'metric': 'Accuracy'}
+    resultats = []
+    for name in models:
+        
+        mse, r2, y_pred = predict(name, df, target_column)
+        st.write(f"{name} :MSE {mse}, R2 {r2}")
+        resultats.append((name, mse, r2))
+    resultats = pd.DataFrame(resultats, columns=['Model', 'MSE', 'R2'])
+    resultats = resultats.sort_values(by='MSE', ascending=True)
     
-    else:
-        raise ValueError("Invalid algorithm. Please choose 'linear_regression' or 'decision_tree'.")
+    st.write(resultats)
+    return resultats
+
+
+    
+
+def predict(model_name, df: pd.DataFrame, target_column: str):
+    models = [
+    ('Regression Linear', LinearRegression()),
+    ('Regression Ridge', Ridge()),
+    ('Regression Lasso', Lasso()),
+    ('K-Nearest Neighbors', KNeighborsRegressor()),
+    ('Decision Tree', DecisionTreeRegressor()),
+    ]
+    model = next((m for m_name, m in models if m_name == model_name), None)
+    
+    x=df.drop(target_column, axis=1).values
+    y=df[target_column].values
+    X_train, X_test, y_train, y_test = train_test_split(x,y, test_size=0.2, random_state=42)
+    model.fit(X_train, y_train)  # entraine le modele
+    y_pred = model.predict(X_test)  # utilise le modele entraine pour predire les valeurs
+
+    mse = mean_squared_error(y_test, y_pred)  # calcul l'erreur quadratique avec la bibliotheque scikit-learn
+    r2 = r2_score(y_test, y_pred)  # calcul le coeff de determination R2 avec la bibliotheque scikit-learn
+
+    return mse, r2, y_pred  # retourne les valeurs de l'erreur quadratique et du coeff de determination

@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import init_data, pre_processing, visualization, ml
-
+from sklearn.model_selection import train_test_split
 st.title("Data Mining Project")
 
 # Sidebar for navigation
@@ -143,14 +143,18 @@ if 'data' in st.session_state:
 
         st.subheader("Prediction:")
         #Selection box to choose the prediction algorithm
-        algorithm = st.selectbox("Choose the prediction algorithm",['linear_regression','decision_tree'])
         target_column = st.selectbox("Choose the target column",st.session_state['data'].columns)
-        if st.button("Perform prediction"):
-            if algorithm == 'linear_regression':
-                model, scores = ml.perform_prediction(st.session_state['data'],target_column,algorithm)
-            elif algorithm == 'decision_tree':
-                model, scores = ml.perform_prediction(st.session_state['data'],target_column,algorithm)
-            st.write(st.session_state['data'])
-            st.write(scores)
+        if st.button("Test models"):
+            resultats=ml.perform_prediction(st.session_state['data'],target_column)
+            visualization.plot_prediction(resultats)
         
-        #Jsp ajouter graph + stats + test
+        models = st.selectbox("Choose the model",['Regression Linear','Regression Ridge','Regression Lasso','K-Nearest Neighbors','Decision Tree'])
+        if st.button("Prediction"):
+            df=st.session_state['data']
+            x=df.drop(target_column, axis=1).values
+            y=df[target_column].values
+            X_train, X_test, y_train, y_test = train_test_split(x,y, test_size=0.2, random_state=42)
+            mse, r2, y_pred =ml.predict(models,st.session_state['data'],target_column)
+            #afficher les resultats
+            st.write(f"{models} :MSE {mse}, R2 {r2}")
+            visualization.plot_predict(y_test, y_pred)
