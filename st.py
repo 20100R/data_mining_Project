@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import init_data, pre_processing, visualization, ml
 from sklearn.model_selection import train_test_split
+import init_data, pre_processing, visualization, ml
+
 st.title("Data Mining Project")
 
 # Sidebar for navigation
@@ -21,8 +22,9 @@ st.sidebar.markdown("Promo 2025 - BI2")
 
 if option == 'Initial Data Exploration':
     st.header("Initial Data Exploration")
-    # Upload the CSV file
-    uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+
+    # Choose file type
+    file_type = st.radio("Select the type of file to upload:", ('CSV', '.data and .names'))
 
     # Variables to hold separator and header choice
     sep = None
@@ -30,36 +32,70 @@ if option == 'Initial Data Exploration':
 
     st.set_option('deprecation.showPyplotGlobalUse', False)
 
+    if file_type == 'CSV':
+        # Upload the CSV file
+        uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+
+        # When the file is present
+        if uploaded_file is not None:
+            # Read the first line to detect the separator
+            sample = uploaded_file.getvalue().decode('utf-8').split('\n')[0]
+            detected_sep = init_data.detect_separator(sample)
+            
+            # Let user choose or confirm the detected separator
+            sep = st.selectbox("Choose the separator", options=[f'Auto-detect: {detected_sep}',';', ',', 'tab'])
+            
+            # If auto-detect is selected, use the detected separator, convert 'tab' to '\t'
+            if sep.startswith('Auto-detect'):
+                sep = detected_sep if detected_sep != 'tab' else '\t'
+            
+            # Let user select the header row
+            header = st.selectbox("Choose the header", [0, 1, 'None'])
+            header = None if header == 'None' else header
+
+            # Load the data using the selected separator and header
+            data = pd.read_csv(uploaded_file, header=header, sep=sep)
+
+            # Display Data
+            init_data.display_description(data)
+
+            if 'data' not in st.session_state:
+                st.session_state['data'] = data
+                st.write("Data loaded successfully")
+            else:
+                st.write("Data loaded successfully")
+
+    elif file_type == '.data and .names':
+        # File uploaders for .data and .names files
+        data_file = st.file_uploader("Upload .data file", type=['data'])
+        names_file = st.file_uploader("Upload .names file", type=['names'])
+        
+        if data_file and names_file:
+
+            # Read the first line to detect the separator
+            first_line = data_file.getvalue().decode('utf-8').split('\n')[0]
+            detected_sep = init_data.detect_separator(first_line)
+
+            sep = st.selectbox("Choose the separator", options=[f'Auto-detect: {detected_sep}', ';', ',', 'tab'])
+
+            if sep.startswith('Auto-detect'):
+                sep = detected_sep if detected_sep != 'tab' else '\t'
+
+            # Resetting file pointer after reading
+            data_file.seek(0)
 
 
-    # When the file is present
-    if uploaded_file is not None:
-        # Read the first line to detect the separator
-        sample = uploaded_file.getvalue().decode('utf-8').split('\n')[0]
-        detected_sep = init_data.detect_separator(sample)
-        
-        # Let user choose or confirm the detected separator
-        sep = st.selectbox("Choose the separator", options=[f'Auto-detect: {detected_sep}',';', ',', 'tab'])
-        
-        # If auto-detect is selected, use the detected separator, convert 'tab' to '\t'
-        if sep.startswith('Auto-detect'):
-            sep = detected_sep if detected_sep != 'tab' else '\t'
-        
-        # Let user select the header row
-        header = st.selectbox("Choose the header", [0, 1, 'None'])
-        header = None if header == 'None' else header
-        
-        # Load the data using the selected separator and header
-        data = pd.read_csv(uploaded_file, header=header, sep=sep)
+            data = init_data.load_data(data_file, names_file, sep, header)
 
-        # Display Data
-        init_data.display_description(data)
+            # Display Data
+            init_data.display_description(data)
 
-        if 'data' not in st.session_state:
-            st.session_state['data'] = data
-            st.write("Data loaded successfully")
-        else:
-            st.write("Data loaded successfully")
+            if 'data' not in st.session_state:
+                st.session_state['data'] = data
+                st.write("Data loaded successfully")
+            else:
+                st.write("Data loaded successfully")
+
 
 # When the file is loaded
 if 'data' in st.session_state:
@@ -162,12 +198,13 @@ if 'data' in st.session_state:
             
 
         st.subheader("Prediction:")
-        #Selection box to choose the prediction algorithm
+        #Selection box to choose the target
         target_column = st.selectbox("Choose the target column",st.session_state['data'].columns)
         if st.button("Test models"):
             resultats=ml.perform_prediction(st.session_state['data'],target_column)
             visualization.plot_prediction(resultats)
-        
+
+        #Selection box to choose the prediction algorithm
         models = st.selectbox("Choose the model",['Regression Linear','Regression Ridge','Regression Lasso','K-Nearest Neighbors','Decision Tree'])
         if st.button("Prediction"):
             df=st.session_state['data']
