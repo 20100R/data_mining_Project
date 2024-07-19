@@ -90,16 +90,16 @@ def predict(model_name, df: pd.DataFrame, target_column: str)->tuple[float, floa
         importances = model.feature_importances_
         feature_importance = pd.Series(importances, index=colums)
         fig, ax = plt.subplots(figsize=(15, 10))
-
         # Plot the decision tree
         plot_tree(model, feature_names=df.drop(columns=[target_column]).columns, filled=True, ax=ax,max_depth=3)
+        plt.rcParams.update({'font.size': 14})
         plt.title(f"Decision Tree for {target_column}")
+        plt.tight_layout()
         st.pyplot(fig)
     elif model_name == 'K-Nearest Neighbors':
 
         result = permutation_importance(model, X_train, y_train, n_repeats=10, random_state=42)
         feature_importance = pd.Series(result.importances_mean, index=colums)
-        
         pca = PCA(n_components=2)
         X_test_pca = pca.fit_transform(X_test)
         fig = plt.figure(figsize=(10, 8))
