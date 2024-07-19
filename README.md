@@ -1,4 +1,6 @@
 # Data Mining Project M1
+https://github.com/20100R/data_mining_Project
+
 
 ## Description
 Ce projet de data mining, réalisé par Dorian Sanjivy et Vincent Reslou, est une application Streamlit conçue pour explorer, nettoyer, visualiser et analyser des ensembles de données. L'application permet aux utilisateurs de charger des données, d'effectuer divers pré-traitements, d'appliquer des méthodes de visualisation et de réaliser des opérations de clustering ou de prédiction.
