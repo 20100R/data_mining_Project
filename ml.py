@@ -4,12 +4,12 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.neighbors import KNeighborsRegressor
-from sklearn.tree import DecisionTreeRegressor
+from sklearn.tree import DecisionTreeRegressor, plot_tree
 import streamlit as st
 import numpy as np
 from sklearn.metrics import mean_squared_error,r2_score
 from sklearn.inspection import permutation_importance
-
+import matplotlib.pyplot as plt
 
 def cluster_spectral(data, n_clusters=3):
     spectral = SpectralClustering(n_clusters=n_clusters, affinity='nearest_neighbors')
@@ -84,20 +84,28 @@ def predict(model_name, df: pd.DataFrame, target_column: str):
     mse = mean_squared_error(y_test, y_pred)  # calcul l'erreur quadratique avec la bibliotheque scikit-learn
     r2 = r2_score(y_test, y_pred)  # calcul le coeff de determination R2 avec la bibliotheque scikit-learn
     if model_name in ['Regression Linear', 'Regression Ridge', 'Regression Lasso']:
-        # Pour les modèles linéaires
         importances = model.coef_
         feature_importance = pd.Series(importances, index=colums)
     
     elif model_name == 'Decision Tree':
-        # Pour l'arbre de décision
         importances = model.feature_importances_
         feature_importance = pd.Series(importances, index=colums)
-    
+        fig, ax = plt.subplots(figsize=(15, 10))
+        plot_tree(model, feature_names=df.drop(columns=[target_column]).columns, filled=True, ax=ax)
+        plt.title(f"Decision Tree for {target_column}")
+        st.pyplot(fig)
     elif model_name == 'K-Nearest Neighbors':
-        # Pour K-Nearest Neighbors, utiliser permutation importance
+        from sklearn.decomposition import PCA
         result = permutation_importance(model, X_train, y_train, n_repeats=10, random_state=42)
         feature_importance = pd.Series(result.importances_mean, index=colums)
-    
+
+
+        fig = plt.figure(figsize=(10, 8))
+        scatter = plt.scatter(X_test[:, 0], X_test[:, 1], c=y_pred, cmap='viridis', edgecolor='k', s=50)
+        plt.colorbar(scatter, label='Cluster')
+        plt.xlabel('')
+        plt.ylabel('')
+        st.pyplot(fig)
     else:
         raise ValueError(f"Feature importance calculation not implemented for model {model_name}.")
     

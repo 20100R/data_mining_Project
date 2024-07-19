@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+from sklearn.tree import plot_tree
 
 def histograms(data: pd.DataFrame):
     for col in data.columns:
