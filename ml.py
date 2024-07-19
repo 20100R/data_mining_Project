@@ -1,6 +1,5 @@
 from sklearn.cluster import KMeans, DBSCAN, SpectralClustering
 import pandas as pd
-from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.neighbors import KNeighborsRegressor
@@ -10,7 +9,7 @@ import numpy as np
 from sklearn.metrics import mean_squared_error,r2_score
 from sklearn.inspection import permutation_importance
 import matplotlib.pyplot as plt
-
+from sklearn.decomposition import PCA
 def cluster_spectral(data, n_clusters=3):
     spectral = SpectralClustering(n_clusters=n_clusters, affinity='nearest_neighbors')
     labels = spectral.fit_predict(data)
@@ -62,7 +61,7 @@ def perform_prediction(df: pd.DataFrame, target_column: str):
 
     
 
-def predict(model_name, df: pd.DataFrame, target_column: str):
+def predict(model_name, df: pd.DataFrame, target_column: str)->tuple[float, float, np.ndarray, pd.Series]:
     models = [
     ('Regression Linear', LinearRegression()),
     ('Regression Ridge', Ridge()),
@@ -78,11 +77,11 @@ def predict(model_name, df: pd.DataFrame, target_column: str):
     colums = colums.drop(target_column)
 
     X_train, X_test, y_train, y_test = train_test_split(x,y, test_size=0.2, random_state=42)
-    model.fit(X_train, y_train)  # entraine le modele
-    y_pred = model.predict(X_test)  # utilise le modele entraine pour predire les valeurs
+    model.fit(X_train, y_train)  # train the model
+    y_pred = model.predict(X_test)  # predict the test data
 
-    mse = mean_squared_error(y_test, y_pred)  # calcul l'erreur quadratique avec la bibliotheque scikit-learn
-    r2 = r2_score(y_test, y_pred)  # calcul le coeff de determination R2 avec la bibliotheque scikit-learn
+    mse = mean_squared_error(y_test, y_pred)  # calculate the mean squared error
+    r2 = r2_score(y_test, y_pred)  # calculate the R2 score
     if model_name in ['Regression Linear', 'Regression Ridge', 'Regression Lasso']:
         importances = model.coef_
         feature_importance = pd.Series(importances, index=colums)
@@ -91,13 +90,16 @@ def predict(model_name, df: pd.DataFrame, target_column: str):
         importances = model.feature_importances_
         feature_importance = pd.Series(importances, index=colums)
         fig, ax = plt.subplots(figsize=(15, 10))
-        plot_tree(model, feature_names=df.drop(columns=[target_column]).columns, filled=True, ax=ax,max_depth=6)
+
+        # Plot the decision tree
+        plot_tree(model, feature_names=df.drop(columns=[target_column]).columns, filled=True, ax=ax,max_depth=3)
         plt.title(f"Decision Tree for {target_column}")
         st.pyplot(fig)
     elif model_name == 'K-Nearest Neighbors':
-        from sklearn.decomposition import PCA
+
         result = permutation_importance(model, X_train, y_train, n_repeats=10, random_state=42)
         feature_importance = pd.Series(result.importances_mean, index=colums)
+        
         pca = PCA(n_components=2)
         X_test_pca = pca.fit_transform(X_test)
         fig = plt.figure(figsize=(10, 8))
@@ -110,7 +112,7 @@ def predict(model_name, df: pd.DataFrame, target_column: str):
         raise ValueError(f"Feature importance calculation not implemented for model {model_name}.")
     
     feature_importance = feature_importance.sort_values(ascending=False)
-    return mse, r2, y_pred,feature_importance  # retourne les valeurs de l'erreur quadratique et du coeff de determination
+    return mse, r2, y_pred,feature_importance  
 
 def compute_cluster_stats(data, labels, centers=None):
     """

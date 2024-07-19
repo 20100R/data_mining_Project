@@ -129,23 +129,29 @@ if 'data' in st.session_state:
         #Selection box to choose the normalization method
         normalization_method = st.selectbox("Choose the normalization method",['Min-Max','Z-standardization','Robust'])
         if st.button("Normalize the data"):
+
             if normalization_method == 'Min-Max':
                 st.session_state['data'] = pre_processing.normalize_min_max(st.session_state['data'])
+
             elif normalization_method == 'Z-standardization':
                 st.session_state['data'] = pre_processing.normalize_z_standardization(st.session_state['data'])
+            
             elif normalization_method == 'Robust':
                 st.session_state['data'] = pre_processing.normalize_robust(st.session_state['data'])
+            
             st.write("Normalize Data:")
             st.write(st.session_state['data'])
 
 
     if option == 'Visualization':
         st.header("Visualization")
-        #Box for the visalization
+
         if st.button("Display histograms"):
             visualization.histograms(st.session_state['data'])
+
         if st.button("Display box plots"):
             visualization.box_plots(st.session_state['data'])
+
         if st.button("Display heatmap"):
             visualization.correlation_heatmap(st.session_state['data'])
 
@@ -184,10 +190,12 @@ if 'data' in st.session_state:
                 labels, centers = ml.perform_clustering(selected_data, algorithm, n_clusters=n_clusters)
                 visualization.plot_clusters(selected_data, labels, [feature_1, feature_2], centers=centers)
                 stats_df = ml.compute_cluster_stats(selected_data, labels, centers)
+
             elif algorithm == 'dbscan':
                 labels = ml.perform_clustering(selected_data, algorithm, eps=eps, min_samples=min_samples)
                 visualization.plot_clusters(selected_data, labels, [feature_1, feature_2])
                 stats_df = ml.compute_cluster_stats(selected_data, labels)
+
             elif algorithm == 'spectral':
                 labels = ml.perform_clustering(selected_data, algorithm, n_clusters=n_clusters)
                 visualization.plot_clusters(selected_data, labels, [feature_1, feature_2])
@@ -212,7 +220,8 @@ if 'data' in st.session_state:
             y=df[target_column].values
             X_train, X_test, y_train, y_test = train_test_split(x,y, test_size=0.2, random_state=42)
             mse, r2, y_pred,feature_importance =ml.predict(models,st.session_state['data'],target_column)
-            #afficher les resultats
+            
+            #print the results 
             st.write(f"{models} :MSE {mse}, R2 {r2}")
             visualization.plot_predict(y_test, y_pred)
             visualization.plot_feature_importance(feature_importance,df.columns.drop(target_column))

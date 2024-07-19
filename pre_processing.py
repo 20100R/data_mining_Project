@@ -7,9 +7,7 @@ from sklearn.preprocessing import RobustScaler
 from sklearn.impute import KNNImputer
 
 def delete_missing_row_col(df: pd.DataFrame):
-    # Delete columns containing at least one NaN value
     df = df.dropna(axis=1, how='any')
-    # Delete lines containing at least one NaN value
     df = df.dropna(axis=0, how='any')
     return df
 
