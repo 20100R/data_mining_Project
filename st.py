@@ -174,7 +174,8 @@ if 'data' in st.session_state:
             x=df.drop(target_column, axis=1).values
             y=df[target_column].values
             X_train, X_test, y_train, y_test = train_test_split(x,y, test_size=0.2, random_state=42)
-            mse, r2, y_pred =ml.predict(models,st.session_state['data'],target_column)
+            mse, r2, y_pred,feature_importance =ml.predict(models,st.session_state['data'],target_column)
             #afficher les resultats
             st.write(f"{models} :MSE {mse}, R2 {r2}")
             visualization.plot_predict(y_test, y_pred)
+            visualization.plot_feature_importance(feature_importance,df.columns.drop(target_column))

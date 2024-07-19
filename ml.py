@@ -8,6 +8,8 @@ from sklearn.tree import DecisionTreeRegressor
 import streamlit as st
 import numpy as np
 from sklearn.metrics import mean_squared_error,r2_score
+from sklearn.inspection import permutation_importance
+
 
 def cluster_spectral(data, n_clusters=3):
     spectral = SpectralClustering(n_clusters=n_clusters, affinity='nearest_neighbors')
@@ -48,7 +50,7 @@ def perform_prediction(df: pd.DataFrame, target_column: str):
     resultats = []
     for name in models:
         
-        mse, r2, y_pred = predict(name, df, target_column)
+        mse, r2, y_pred, feature_importance = predict(name, df, target_column)
         st.write(f"{name} :MSE {mse}, R2 {r2}")
         resultats.append((name, mse, r2))
     resultats = pd.DataFrame(resultats, columns=['Model', 'MSE', 'R2'])
@@ -72,14 +74,35 @@ def predict(model_name, df: pd.DataFrame, target_column: str):
     
     x=df.drop(target_column, axis=1).values
     y=df[target_column].values
+    colums = df.columns
+    colums = colums.drop(target_column)
+
     X_train, X_test, y_train, y_test = train_test_split(x,y, test_size=0.2, random_state=42)
     model.fit(X_train, y_train)  # entraine le modele
     y_pred = model.predict(X_test)  # utilise le modele entraine pour predire les valeurs
 
     mse = mean_squared_error(y_test, y_pred)  # calcul l'erreur quadratique avec la bibliotheque scikit-learn
     r2 = r2_score(y_test, y_pred)  # calcul le coeff de determination R2 avec la bibliotheque scikit-learn
-
-    return mse, r2, y_pred  # retourne les valeurs de l'erreur quadratique et du coeff de determination
+    if model_name in ['Regression Linear', 'Regression Ridge', 'Regression Lasso']:
+        # Pour les modèles linéaires
+        importances = model.coef_
+        feature_importance = pd.Series(importances, index=colums)
+    
+    elif model_name == 'Decision Tree':
+        # Pour l'arbre de décision
+        importances = model.feature_importances_
+        feature_importance = pd.Series(importances, index=colums)
+    
+    elif model_name == 'K-Nearest Neighbors':
+        # Pour K-Nearest Neighbors, utiliser permutation importance
+        result = permutation_importance(model, X_train, y_train, n_repeats=10, random_state=42)
+        feature_importance = pd.Series(result.importances_mean, index=colums)
+    
+    else:
+        raise ValueError(f"Feature importance calculation not implemented for model {model_name}.")
+    
+    feature_importance = feature_importance.sort_values(ascending=False)
+    return mse, r2, y_pred,feature_importance  # retourne les valeurs de l'erreur quadratique et du coeff de determination
 
 def compute_cluster_stats(data, labels, centers=None):
     """

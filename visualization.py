@@ -102,3 +102,12 @@ def plot_predict(y_test, y_pred):
             plt.ylabel('Predicted values')
             plt.title('True vs Predicted values')
             st.pyplot(fig)
+
+def plot_feature_importance(feature_importance, features):
+    fig, ax = plt.subplots()
+    ax.bar(features, feature_importance)
+    ax.set_xlabel('Feature')
+    ax.set_ylabel('Importance')
+    ax.set_title('Feature Importance')
+    ax.set_xticklabels(features, rotation=45)
+    st.pyplot(fig)
