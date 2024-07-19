@@ -91,8 +91,10 @@ def predict(model_name, df: pd.DataFrame, target_column: str):
         importances = model.feature_importances_
         feature_importance = pd.Series(importances, index=colums)
         fig, ax = plt.subplots(figsize=(15, 10))
-        plot_tree(model, feature_names=df.drop(columns=[target_column]).columns, filled=True, ax=ax,max_depth=6)
+        plot_tree(model, feature_names=df.drop(columns=[target_column]).columns, filled=True, ax=ax,max_depth=3)
+        plt.rcParams.update({'font.size': 14})
         plt.title(f"Decision Tree for {target_column}")
+        plt.tight_layout()
         st.pyplot(fig)
     elif model_name == 'K-Nearest Neighbors':
         from sklearn.decomposition import PCA
