@@ -91,17 +91,17 @@ def predict(model_name, df: pd.DataFrame, target_column: str):
         importances = model.feature_importances_
         feature_importance = pd.Series(importances, index=colums)
         fig, ax = plt.subplots(figsize=(15, 10))
-        plot_tree(model, feature_names=df.drop(columns=[target_column]).columns, filled=True, ax=ax)
+        plot_tree(model, feature_names=df.drop(columns=[target_column]).columns, filled=True, ax=ax,max_depth=6)
         plt.title(f"Decision Tree for {target_column}")
         st.pyplot(fig)
     elif model_name == 'K-Nearest Neighbors':
         from sklearn.decomposition import PCA
         result = permutation_importance(model, X_train, y_train, n_repeats=10, random_state=42)
         feature_importance = pd.Series(result.importances_mean, index=colums)
-
-
+        pca = PCA(n_components=2)
+        X_test_pca = pca.fit_transform(X_test)
         fig = plt.figure(figsize=(10, 8))
-        scatter = plt.scatter(X_test[:, 0], X_test[:, 1], c=y_pred, cmap='viridis', edgecolor='k', s=50)
+        scatter = plt.scatter(X_test_pca[:, 0], X_test_pca[:, 1], c=y_pred, cmap='viridis')
         plt.colorbar(scatter, label='Cluster')
         plt.xlabel('')
         plt.ylabel('')
